@@ -1,0 +1,59 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'vajralalikhith@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+          (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'security'))
+      );
+    }
+
+    function isOwner(reporterId) {
+      return isSignedIn() && request.auth.uid == reporterId;
+    }
+
+    // Items (Lost & Found Reports):
+    match /items/{itemId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+      allow update: if isOwner(resource.data.reporterId) || isAdmin();
+      allow delete: if isOwner(resource.data.reporterId) || isAdmin();
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if (isSignedIn() && request.auth.uid == userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Notifications
+    match /notifications/{notifId} {
+      allow read: if true;
+      allow create, update, delete: if isSignedIn() || isAdmin();
+    }
+
+    // Conversations & Real-Time Chat Messages
+    match /conversations/{convId} {
+      allow read, write: if isSignedIn();
+
+      match /messages/{messageId} {
+        allow read, write: if isSignedIn();
+      }
+    }
+
+    // Admin catch-all access for any other document/collection
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

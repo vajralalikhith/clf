@@ -1,0 +1,69 @@
+{
+  "entities": {
+    "users": {
+      "title": "User Profile",
+      "description": "User account profiles for campus community members",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "studentId": { "type": "string" },
+        "role": { "type": "string" },
+        "department": { "type": "string" },
+        "phone": { "type": "string" },
+        "avatar": { "type": "string" },
+        "joinedDate": { "type": "string" },
+        "isOnline": { "type": "boolean" },
+        "lastActive": { "type": "string" }
+      },
+      "required": ["id", "name", "email"]
+    },
+    "items": {
+      "title": "Lost & Found Items",
+      "description": "Reports of lost and found items on campus including image storage URLs",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "type": { "type": "string" },
+        "category": { "type": "string" },
+        "status": { "type": "string" },
+        "description": { "type": "string" },
+        "location": { "type": "string" },
+        "building": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "contactName": { "type": "string" },
+        "contactEmail": { "type": "string" },
+        "contactPhone": { "type": "string" },
+        "reporterId": { "type": "string" },
+        "reporterRole": { "type": "string" },
+        "reward": { "type": "string" },
+        "verificationQuestion": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string" },
+        "viewsCount": { "type": "number" },
+        "verified": { "type": "boolean" }
+      },
+      "required": ["id", "title", "type", "category", "status", "imageUrl", "reporterId"]
+    },
+    "conversations": {
+      "title": "Chat Conversations",
+      "description": "Real-time chat threads between item reporters and claimants",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "itemId": { "type": "string" },
+        "itemTitle": { "type": "string" },
+        "itemImageUrl": { "type": "string" },
+        "participants": { "type": "array", "items": { "type": "string" } },
+        "lastMessage": { "type": "string" },
+        "lastMessageSenderId": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "itemId", "participants"]
+    }
+  }
+}

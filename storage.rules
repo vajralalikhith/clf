@@ -1,0 +1,46 @@
+rules_version = '2';
+
+// Firebase Storage Security Rules
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'vajralalikhith@gmail.com' ||
+        firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid)) ||
+        (firestore.exists(/databases/(default)/documents/users/$(request.auth.uid)) &&
+          (firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+           firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'security'))
+      );
+    }
+
+    // Public read access for item report images; signed-in users can upload validated image files (<5MB)
+    match /items/{itemId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if (
+        isSignedIn() &&
+        request.resource.size < 5 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*')
+      ) || isAdmin();
+    }
+
+    // User profile avatars
+    match /users/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if (
+        isSignedIn() &&
+        request.auth.uid == userId &&
+        request.resource.size < 5 * 1024 * 1024 &&
+        request.resource.contentType.matches('image/.*')
+      ) || isAdmin();
+    }
+
+    // Admin catch-all access for storage objects
+    match /{allPaths=**} {
+      allow read, write: if isAdmin();
+    }
+  }
+}
